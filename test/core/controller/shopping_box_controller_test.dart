@@ -19,6 +19,8 @@ void setUpMockMethodChannel() {
 class MockShoppingCotroller extends Mock implements ShoppingBoxController{}
 void main() {
   late MockShoppingCotroller mockShoppingCotroller;
+
+
   setUp(()async{
     WidgetsFlutterBinding.ensureInitialized();
     await Hive.initFlutter();
@@ -31,7 +33,5 @@ void main() {
         expect(mockShoppingCotroller.items, []);
         expect(mockShoppingCotroller.isLoading, false);
     });
-
-
   });
 }
