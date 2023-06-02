@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_db_app/core/controller/shopping_box_controller.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'core/helper/controller-initializer.dart' as di;
+import 'core/helper/controller_initializer.dart' as di;
 import 'core/widgets/form_dialog_widget.dart';
 
 Future<void> main() async {
