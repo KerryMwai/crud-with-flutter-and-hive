@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.purpleAccent.shade100,
         title: const Text("Hive Db"),
         centerTitle: true,
       ),
