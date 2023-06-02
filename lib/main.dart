@@ -1,3 +1,7 @@
+// https://www.digitalocean.com/community/tutorials/a-practical-graphql-getting-started-guide-with-nodejs
+// https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
+
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -33,8 +37,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
 
   List<Map<String, dynamic>> _items = [];
 
