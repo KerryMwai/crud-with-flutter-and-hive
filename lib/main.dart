@@ -3,12 +3,16 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hive_db_app/core/controller/shopping_box_controller.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'core/helper/controller-initializer.dart' as di;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox("shopping_box");
+  await di.init();
   runApp(const MyApp());
 }
 
@@ -18,7 +22,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
@@ -39,44 +43,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
-
-  List<Map<String, dynamic>> _items = [];
-
-  final _shopping_box = Hive.box("shopping_box");
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshItems();
-  }
-
-  void _refreshItems() {
-    final data = _shopping_box.keys.map((key) {
-      final item = _shopping_box.get(key);
-      return {"key": key, "name": item['name'], "quantity": item['quantity']};
-    }).toList();
-
-    setState(() {
-      _items = data.reversed.toList();
-    });
-  }
-
-  Future<void> _createItem(Map<String, dynamic> item) async {
-    await _shopping_box.add(item);
-    _refreshItems();
-    print(_items.length);
-  }
-
-  Future<void> _updateItem(itemKey, Map<String, dynamic> item) async {
-    _shopping_box.put(itemKey, item);
-    _refreshItems();
-  }
-
-  Future<void> _deleteItem(itemKey)async{
-    _shopping_box.delete(itemKey);
-    _refreshItems();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,44 +51,46 @@ class _HomeState extends State<Home> {
         title: const Text("Hive Db"),
         centerTitle: true,
       ),
-      body: ListView.builder(
-          itemCount: _items.length,
-          itemBuilder: (context, index) {
-            final currentItem = _items[index];
-            return Card(
-              color: Colors.orange.shade100,
-              margin: const EdgeInsets.all(10),
-              elevation: 3,
-              child: ListTile(
-                title: Text(currentItem['name']),
-                subtitle: Text(currentItem['quantity']),
-                trailing: SizedBox(
-                  width: 110,
-                  child: Row(children: [
-                    IconButton(
-                        onPressed: () {
-                          _showForm(currentItem['key']);
-                        },
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.green,
-                        )),
-                    IconButton(
-                        onPressed: () {
-                          _deleteItem(currentItem['key']);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Item deleted successfully"))
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ))
-                  ]),
+      body: Obx(()=>
+         ListView.builder(
+            itemCount: Get.find<ShoppingBoxController>().items.length,
+            itemBuilder: (context, index) {
+              final currentItem = Get.find<ShoppingBoxController>().items[index];
+              return Card(
+                color: Colors.orange.shade100,
+                margin: const EdgeInsets.all(10),
+                elevation: 3,
+                child: ListTile(
+                  title: Text(currentItem['name']),
+                  subtitle: Text(currentItem['quantity']),
+                  trailing: SizedBox(
+                    width: 110,
+                    child: Row(children: [
+                      IconButton(
+                          onPressed: () {
+                            _showForm(currentItem['key']);
+                          },
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.green,
+                          )),
+                      IconButton(
+                          onPressed: () {
+                            Get.find<ShoppingBoxController>().deleteItem(currentItem['key']);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Item deleted successfully"))
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ))
+                    ]),
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showForm(null),
         child: const Icon(Icons.add),
@@ -132,7 +100,7 @@ class _HomeState extends State<Home> {
 
   Future<void> _showForm(key) async {
     if (key != null) {
-      final existingItem = _items.firstWhere((item) => item['key'] == key);
+      final existingItem =Get.find<ShoppingBoxController>().items.firstWhere((item) => item['key'] == key);
 
       _nameController.text = existingItem['name'];
       _quantityController.text = existingItem['quantity'];
@@ -188,7 +156,7 @@ class _HomeState extends State<Home> {
                     : const Text('Update Item'),
                 onPressed: () {
                   if (key == null) {
-                    _createItem({
+                   Get.find<ShoppingBoxController>().createItem({
                       "name": _nameController.text,
                       "quantity": _quantityController.text
                     });
@@ -199,7 +167,7 @@ class _HomeState extends State<Home> {
                   }
 
                   if(key!=null){
-                    _updateItem(key, {
+                   Get.find<ShoppingBoxController>().updateItem(key, {
                       'name':_nameController.text.trim(),
                       'quantity':_quantityController.text.trim()
                     });
